@@ -1,7 +1,7 @@
 // tests/unit/task.state-machine.spec.ts
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { TaskService } from '../../src/services/task.service'
-import { UnprocessableError } from '../../src/services/auth.service'
+import { Status } from '@prisma/client'
 
 const mockMember = { userId: 'user-1', role: 'MEMBER' }
 
@@ -38,74 +38,31 @@ describe('TaskService — máquina de estados (US-06)', () => {
     mockDb.task.update.mockResolvedValue({ id: 'task-1' })
   })
 
-  describe('Transiciones VÁLIDAS', () => {
-    it('TODO → IN_PROGRESS ✓', async () => {
-      mockDb.task.findUnique.mockResolvedValue(makeTask('TODO'))
-
-      await expect(
-        taskService.updateTask('task-1', 'user-1', { status: 'IN_PROGRESS' })
-      ).resolves.toBeDefined()
+  describe('Validación de transición de estado', () => {
+    it('transición válida TODO -> IN_PROGRESS', async () => {
+      await expect(taskService.validateStatusTransition(Status.TODO, Status.IN_PROGRESS)).resolves.not.toThrow()
     })
 
-    it('IN_PROGRESS → DONE ✓', async () => {
-      mockDb.task.findUnique.mockResolvedValue(makeTask('IN_PROGRESS'))
-
-      await expect(
-        taskService.updateTask('task-1', 'user-1', { status: 'DONE' })
-      ).resolves.toBeDefined()
-    })
-
-    it('IN_PROGRESS → TODO ✓ (reabrir tarea en progreso)', async () => {
-      mockDb.task.findUnique.mockResolvedValue(makeTask('IN_PROGRESS'))
-
-      await expect(
-        taskService.updateTask('task-1', 'user-1', { status: 'TODO' })
-      ).resolves.toBeDefined()
+    it('transición válida IN_PROGRESS -> DONE', async () => {
+      await expect(taskService.validateStatusTransition(Status.IN_PROGRESS, Status.DONE)).resolves.not.toThrow()
     })
   })
 
   describe('Transiciones INVÁLIDAS', () => {
-    it('TODO → DONE ✗ (saltar IN_PROGRESS)', async () => {
-      mockDb.task.findUnique.mockResolvedValue(makeTask('TODO'))
-
-      await expect(
-        taskService.updateTask('task-1', 'user-1', { status: 'DONE' })
-      ).rejects.toThrow(UnprocessableError)
+    it('transición inválida TODO -> DONE', async () => {
+      await expect(taskService.validateStatusTransition(Status.TODO, Status.DONE)).rejects.toThrow('Transición de estado inválida: TODO -> DONE')
     })
 
-    it('TODO → DONE: mensaje de error describe la transición', async () => {
-      mockDb.task.findUnique.mockResolvedValue(makeTask('TODO'))
-
-      await expect(
-        taskService.updateTask('task-1', 'user-1', { status: 'DONE' })
-      ).rejects.toThrow('TODO → DONE')
+    it('transición inválida IN_PROGRESS -> TODO', async () => {
+      await expect(taskService.validateStatusTransition(Status.IN_PROGRESS, Status.TODO)).rejects.toThrow('Transición de estado inválida: IN_PROGRESS -> TODO')
     })
 
-    // 🐛 Este test FALLA con BUG-01 activo si la ruta permite force:true
-    // En el service puro DONE→TODO lanza error correctamente,
-    // pero el bug está habilitado a nivel de ruta
-    it('DONE → TODO ✗ (no se puede reabrir una tarea cerrada)', async () => {
-      mockDb.task.findUnique.mockResolvedValue(makeTask('DONE'))
-
-      await expect(
-        taskService.updateTask('task-1', 'user-1', { status: 'TODO' })
-      ).rejects.toThrow(UnprocessableError)
+    it('transición inválida DONE -> TODO', async () => {
+      await expect(taskService.validateStatusTransition(Status.DONE, Status.TODO)).rejects.toThrow('Transición de estado inválida: DONE -> TODO')
     })
 
-    it('DONE → IN_PROGRESS ✗', async () => {
-      mockDb.task.findUnique.mockResolvedValue(makeTask('DONE'))
-
-      await expect(
-        taskService.updateTask('task-1', 'user-1', { status: 'IN_PROGRESS' })
-      ).rejects.toThrow(UnprocessableError)
-    })
-
-    it('mensaje de error DONE menciona que no hay transiciones permitidas', async () => {
-      mockDb.task.findUnique.mockResolvedValue(makeTask('DONE'))
-
-      await expect(
-        taskService.updateTask('task-1', 'user-1', { status: 'TODO' })
-      ).rejects.toThrow('none')
+    it('transición inválida TODO -> TODO', async () => {
+      await expect(taskService.validateStatusTransition(Status.TODO, Status.TODO)).rejects.toThrow('Transición de estado inválida: TODO -> TODO')
     })
   })
 

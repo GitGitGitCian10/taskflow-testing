@@ -3,6 +3,10 @@
 Proyecto integrador del curso **Testing y Calidad de Software**.
 App de gestión de tareas (tipo Jira simplificado) con suite completa de tests.
 
+## Integrantes:
+- **Santiago Aurrecochea**
+- **Ignacio Villarreal**
+
 ---
 
 ## Setup rápido

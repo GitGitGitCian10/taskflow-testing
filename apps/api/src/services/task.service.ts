@@ -23,14 +23,14 @@ export type UpdateTaskInput = z.infer<typeof UpdateTaskSchema>
 // Valid state transitions
 const VALID_TRANSITIONS: Record<Status, Status[]> = {
   TODO: ['IN_PROGRESS'],
-  IN_PROGRESS: ['TODO', 'DONE'],
+  IN_PROGRESS: ['DONE'],
   // BUG-01: DONE should have no valid transitions.
   // This allows DONE -> TODO if payload includes force:true at route level.
   DONE: [],
 }
 
 export class TaskService {
-  constructor(private db: PrismaClient) {}
+  constructor(private db: PrismaClient) { }
 
   async createTask(projectId: string, userId: string, input: CreateTaskInput) {
     const parsed = CreateTaskSchema.parse(input)
@@ -65,7 +65,7 @@ export class TaskService {
       if (!allowed.includes(parsed.status)) {
         throw new UnprocessableError(
           `Invalid transition: ${task.status} → ${parsed.status}. ` +
-            `Allowed: ${allowed.length ? allowed.join(', ') : 'none'}`
+          `Allowed: ${allowed.length ? allowed.join(', ') : 'none'}`
         )
       }
 
@@ -88,6 +88,19 @@ export class TaskService {
         statusHistory: { orderBy: { changedAt: 'asc' } },
       },
     })
+  }
+
+  async validateTitle(title: string) {
+    if (title.length < 3) throw new Error('El título debe tener al menos 3 caracteres')
+    if (title.length > 100) throw new Error('El título no puede superar los 100 caracteres')
+    if (title.length == 0 || title.trim() == "") throw new Error('El título no puede estar vacío')
+  }
+
+  async validateStatusTransition(currentStatus: Status, newStatus: Status) {
+    const allowed = VALID_TRANSITIONS[currentStatus]
+    if (!allowed.includes(newStatus)) {
+      throw new Error(`Transición de estado inválida: ${currentStatus} -> ${newStatus}`)
+    }
   }
 
   async getTasks(
