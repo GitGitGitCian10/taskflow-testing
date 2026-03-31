@@ -22,8 +22,7 @@ jobs:
           cache: 'npm'
       - run: npm ci
       - run: npm run lint
-      - name: Type check
-        run: npx tsc --noEmit --project apps/api/tsconfig.json
+      - run: npm run typecheck
 
   # ── 2. Unit Tests ────────────────────────────────────────────
   unit-tests:
