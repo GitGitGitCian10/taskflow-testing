@@ -110,9 +110,11 @@ taskflow/
 │           ├── components/  ← Navbar, TaskCard*, CommentList*
 │           └── types/       ← tipos del dominio
 ├── e2e/               # Playwright + Cucumber
-│   ├── features/      ← archivos .feature (Gherkin)
-│   ├── pages/         ← Page Object Model
-│   └── step-definitions/
+│   ├── features/      ← Archivos .feature (Gherkin)
+│   ├── tests/         ← Steps de Cucumber
+│   └── playwright/
+│           ├── pages/       ← Page Objects
+│           └── tests/       ← Specs de Playwright
 ├── performance/       ← k6 scripts
 ├── docs/adr/          ← Architecture Decision Records
 ├── setup.sh           ← script de setup inicial
