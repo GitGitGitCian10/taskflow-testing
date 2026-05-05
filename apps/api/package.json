@@ -7,12 +7,15 @@
     "dev": "tsx watch src/index.ts",
     "build": "tsc",
     "start": "node dist/index.js",
-    "lint": "eslint src tests",
+    "lint": "eslint src tests features",
     "typecheck": "tsc --noEmit",
+    "test": "dotenv -e .env.test --override -- vitest run tests/unit tests/integration/mocks",
     "test:unit": "vitest run tests/unit --coverage",
-    "test:integration": "vitest run tests/integration",
-    "test:bdd": "cucumber-js",
-    "test:watch": "vitest"
+    "test:integration": "dotenv -e .env.test --override -- vitest run tests/integration/mocks tests/projects.integration.test.ts tests/tasks.integration.test.ts",
+    "test:pact:provider": "dotenv -e .env.test --override -- vitest run tests/pact/projects.provider.pact.test.ts",
+    "test:bdd": "dotenv -e .env.test --override -- tsx ../../node_modules/@cucumber/cucumber/bin/cucumber.js --config cucumber.cjs",
+    "test:watch": "dotenv -e .env.test --override -- vitest tests/unit tests/integration/mocks",
+    "db:migrate:test": "dotenv -e .env.test --override -- prisma migrate deploy"
   },
   "dependencies": {
     "@prisma/client": "^5.14.0",
@@ -27,6 +30,7 @@
     "seed": "tsx src/prisma/seed.ts"
   },
   "devDependencies": {
+    "@pact-foundation/pact": "^16.3.0",
     "@cucumber/cucumber": "^10.8.0",
     "@types/bcryptjs": "^2.4.6",
     "@types/cors": "^2.8.17",
@@ -35,6 +39,7 @@
     "@types/node": "^20.14.2",
     "@types/supertest": "^6.0.2",
     "@vitest/coverage-v8": "^1.6.0",
+    "dotenv-cli": "^7.4.2",
     "eslint": "^9.4.0",
     "prisma": "^5.14.0",
     "supertest": "^7.0.0",

@@ -22,7 +22,7 @@ export default [
     },
   },
   {
-    files: ['**/*.spec.ts', '**/tests/**/*.ts'],
+    files: ['**/*.spec.ts', '**/tests/**/*.ts', '**/features/**/*.ts'],
     languageOptions: {
       globals: {
         ...globals.node,

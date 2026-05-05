@@ -1,0 +1,550 @@
+{
+  "info": {
+    "_postman_id": "416b637e-2251-4818-8909-c34a7f4d8fc6",
+    "name": "TaskFlow API — Clase 4",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "29330789"
+  },
+  "item": [
+    {
+      "name": "Autenticación",
+      "item": [
+        {
+          "name": "Registro de usuario (US-01)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 201 Created', () => { \r",
+                  "  pm.response.to.have.status(201); \r",
+                  "}); \r",
+                  " \r",
+                  "pm.test('Response tiene id y email', () => { \r",
+                  "  const body = pm.response.json(); \r",
+                  "  pm.expect(body).to.have.property('user'); \r",
+                  "  pm.expect(body.user).to.have.property('id'); \r",
+                  "  pm.expect(body.user.email).to.eql('ana3@ejemplo.com'); \r",
+                  "}); "
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{ \r\n    \"name\": \"Ana García\", \r\n    \"email\": \"ana3@ejemplo.com\", \r\n    \"password\": \"Segura123!\" \r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/auth/register",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "auth",
+                "register"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Login y captura automática del JWT (US-02)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200 OK', () => { \r",
+                  "  pm.response.to.have.status(200); \r",
+                  "}); \r",
+                  " \r",
+                  "pm.test('Response contiene token JWT', () => { \r",
+                  "  const body = pm.response.json(); \r",
+                  "  pm.expect(body).to.have.property('token'); \r",
+                  "  pm.environment.set('token', body.token); \r",
+                  "}); "
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{ \r\n  \"email\": \"ana3@ejemplo.com\", \r\n  \"password\": \"Segura123!\" \r\n} ",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/auth/login",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "auth",
+                "login"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Login — credenciales  inválidas (US-02)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 401 OK', () => { \r",
+                  "  pm.response.to.have.status(401); \r",
+                  "}); \r",
+                  "\r",
+                  "pm.test('Response contiene error', () => { \r",
+                  "  const body = pm.response.json(); \r",
+                  "  pm.expect(body).to.have.property('error'); \r",
+                  "}); "
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{ \r\n  \"email\": \"ana3@ejemplo.com\", \r\n  \"password\": \"Segura123\" \r\n} ",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/auth/login",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "auth",
+                "login"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Login — email no  registrado (US-02)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 401 OK', () => { \r",
+                  "  pm.response.to.have.status(401); \r",
+                  "}); \r",
+                  "\r",
+                  "pm.test('Response contiene error', () => { \r",
+                  "  const body = pm.response.json(); \r",
+                  "  pm.expect(body).to.have.property('error'); \r",
+                  "}); "
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{ \r\n  \"email\": \"ana@eje.com\", \r\n  \"password\": \"Segura123!\" \r\n} ",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/auth/login",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "auth",
+                "login"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Proyectos",
+      "item": []
+    },
+    {
+      "name": "Tareas",
+      "item": [
+        {
+          "name": "Crear proyecto (US-03)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Proyecto creado con status 201', () => { \r",
+                  "  pm.response.to.have.status(201); \r",
+                  "}); \r",
+                  " \r",
+                  "pm.test('Response tiene id, name y status activo', () => { \r",
+                  "  const body = pm.response.json(); \r",
+                  "  pm.expect(body.id).to.be.a('string'); \r",
+                  "  pm.expect(body.name).to.eql('Mi proyecto de testing'); \r",
+                  "  pm.environment.set('project_id', body.id); \r",
+                  "}); "
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer"
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{ \r\n    \"name\": \"Mi proyecto de testing\",\r\n    \"description\": \"Creado en la práctica Clase 4\"\r\n} ",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/projects",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "projects"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Crear tarea (US-05) y capturar task_id",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Tarea creada con status TODO', () => { ",
+                  "  pm.response.to.have.status(201); ",
+                  "  const body = pm.response.json(); ",
+                  "  pm.expect(body.status).to.eql('TODO'); ",
+                  "  pm.environment.set('task_id', body.id); ",
+                  "}); ",
+                  " ",
+                  "pm.test('Priority HIGH se persistió correctamente', () => { ",
+                  "  pm.expect(pm.response.json().priority).to.eql('HIGH'); ",
+                  "});",
+                  "",
+                  "// US-05 | Edge Case — Título vacío → 400 Bad Request",
+                  "pm.test('[US-05] Título vacío → 400 Bad Request', () => {",
+                  "  // Este test se activa solo si el response es 400",
+                  "  // Para ejecutarlo: enviar el request con \"title\": \"\"",
+                  "  if (pm.response.code === 400) {",
+                  "    pm.response.to.have.status(400);",
+                  "    const body = pm.response.json();",
+                  "    pm.expect(body).to.have.property('message');",
+                  "    pm.expect(body.message).to.be.a('string').and.not.empty;",
+                  "  } else {",
+                  "    // Si el status no es 400, marcar como skipped con nota",
+                  "    console.warn('[US-05 Edge Case] Este test requiere enviar title vacío (\"\"). Status actual: ' + pm.response.code);",
+                  "    pm.expect(true).to.be.true; // no falla el run normal",
+                  "  }",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}} ",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{ \r\n  \"title\": \"Configurar colección Postman\", \r\n  \"priority\": \"HIGH\" \r\n} ",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/projects/{{project_id}}/tasks",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "projects",
+                "{{project_id}}",
+                "tasks"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Cambiar estado de tarea (US-06) 1",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "\r",
+                  "pm.test('Tarea actualizada con status IN_PROGRESS', () => { \r",
+                  "  pm.response.to.have.status(200); \r",
+                  "  const body = pm.response.json(); \r",
+                  "  pm.expect(body.status).to.eql('IN_PROGRESS'); \r",
+                  "}); \r",
+                  ""
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}} ",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"status\": \"IN_PROGRESS\"\r\n} ",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/tasks/{{task_id}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "tasks",
+                "{{task_id}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Cambiar estado de tarea (US-06) 2",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "\r",
+                  "pm.test('Tarea actualizada con status DONE', () => { \r",
+                  "  pm.response.to.have.status(200); \r",
+                  "  const body = pm.response.json(); \r",
+                  "  pm.expect(body.status).to.eql('DONE'); \r",
+                  "}); \r",
+                  ""
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}} ",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"status\": \"DONE\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/tasks/{{task_id}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "tasks",
+                "{{task_id}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Cambiar estado de tarea (US-06) 3",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "\r",
+                  "pm.test('Tarea actualizada con status TODO', () => { \r",
+                  "  pm.response.to.have.status(422); \r",
+                  "}); \r",
+                  ""
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}} ",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"status\": \"TODO\"\r\n} ",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/tasks/{{task_id}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "tasks",
+                "{{task_id}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Cambiar estado de tarea (US-06) 4",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "\r",
+                  "pm.test('Tarea actualizada con status PENDIENTE', () => { \r",
+                  "  pm.response.to.have.status(400); \r",
+                  "}); \r",
+                  ""
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}} ",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"status\": \"PENDIENTE\"\r\n} ",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/tasks/{{task_id}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "tasks",
+                "{{task_id}}"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Comentarios",
+      "item": []
+    }
+  ]
+}

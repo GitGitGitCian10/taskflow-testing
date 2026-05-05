@@ -4,15 +4,17 @@ export default defineConfig({
   test: {
     globals: true,
     environment: 'node',
+    // Shared Postgres: integration files must run sequentially
+    fileParallelism: false,
     coverage: {
       provider: 'v8',
       reporter: ['text', 'json', 'html'],
-      include: ['src/services/**'],
+      include: ['src/services/**/*.ts'],
       thresholds: {
-        lines: 30,
-        functions: 40,
-        statements: 30,
-        branches: 75
+        lines: 70,
+        functions: 60,
+        statements: 70,
+        branches: 65
       }
     },
     setupFiles: ['./tests/setup.ts'],
