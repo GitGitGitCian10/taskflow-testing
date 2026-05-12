@@ -1,0 +1,26 @@
+ Lo que salió bien:
+
+  - Los mocks de TaskService y AuthService están bien configurados, y capturaron el taskServiceMock en beforeAll, 
+    que era el punto técnico más complicado del bloque. 
+  - Los tests de GET (200 con 2 tareas y 401) pasan sin errores.
+  - playwright.config.ts tiene el testDir correcto apuntando a ./e2e.
+  - La estructura de carpetas e2e/playwright/pages/ y e2e/playwright/tests/ está respetada.
+  - LoginPage.ts está completo: todos los métodos requeridos, y los locators usan getByTestId correctamente 
+    como indicaba la guía.
+  - ProjectListPage.ts tiene los tres métodos pedidos (createProject, expectProjectVisible, expectProjectCount).
+  - projects.e2e.spec.ts es el punto más sólido del trabajo: implementa el flujo completo 
+    registro → login → crear proyecto → verificar, usa Date.now() para aislar tests, y no tiene ningún selector
+    en el spec (todo encapsulado en los Page Objects).
+
+ 
+ Para corregir:
+
+1. Corregir el import de ProjectListPage.ts
+  Cambiar from 'playwright/test' por from '@playwright/test' en la línea 1. Un solo carácter de diferencia.
+
+2. Usar ValidationError en el test 400 de título vacío
+  El patrón de error tipado con statusCode ya lo conocen del código fuente. Solo aplicarlo en el mock.
+
+
+
+*** CALIFICACIÓN: 93/100 ***
