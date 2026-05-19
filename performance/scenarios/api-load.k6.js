@@ -5,8 +5,8 @@ import { Rate, Trend } from 'k6/metrics'
 
 // ── Custom metrics ────────────────────────────────────────────
 const errorRate = new Rate('error_rate')
-const loginDuration = new Trend('login_duration', true)
-const tasksDuration = new Trend('tasks_list_duration', true)
+const tasksDuration = new Trend('tasks_duration', true)
+const listDuration = new Trend('list_duration', true)
 
 // ── Thresholds (SLOs definidos en US como NFRs) ───────────────
 export const options = {
@@ -16,8 +16,8 @@ export const options = {
     // SLO: error rate < 1%
     error_rate: ['rate<0.01'],
     // SLOs por endpoint
-    login_duration: ['p(95)<300'],
-    tasks_list_duration: ['p(95)<400'],
+    list_duration: ['p(95)<400'],
+    tasks_duration: ['p(95)<400'],
   },
 
   scenarios: {
@@ -27,7 +27,7 @@ export const options = {
       startVUs: 0,
       stages: [
         { duration: '30s', target: 50 },  // ramp up
-        { duration: '1m',  target: 50 },  // steady state
+        { duration: '1m', target: 50 },  // steady state
         { duration: '30s', target: 0 },   // ramp down
       ],
       tags: { scenario: 'load' },
@@ -52,13 +52,46 @@ const BASE_URL = __ENV.BASE_URL || 'http://localhost:3001'
 
 // ── Setup: crear usuario para el test ────────────────────────
 export function setup() {
+  const email = `perf-${Date.now()}@test.com`
+  const password = 'Password1'
+
+  // 1. Registrar usuario
   const res = http.post(`${BASE_URL}/auth/register`, JSON.stringify({
-    email: `perf-${Date.now()}@test.com`,
-    password: 'Password1',
+    email,
+    password,
     name: 'Perf User',
   }), { headers: { 'Content-Type': 'application/json' } })
 
-  return { token: res.json('token'), userId: res.json('user.id') }
+  const token = res.json('token')
+  const headers = {
+    'Content-Type': 'application/json',
+    'Authorization': `Bearer ${token}`,
+  }
+
+  // 2. Crear proyecto
+  const projRes = http.post(`${BASE_URL}/projects`, JSON.stringify({
+    name: 'Load Test Project',
+    description: 'Created during setup'
+  }), { headers })
+
+  const projectId = projRes.json('id')
+
+  // 3. Crear tarea
+  http.post(`${BASE_URL}/projects/${projectId}/tasks`, JSON.stringify({
+    title: 'Load Test Task',
+    priority: 'HIGH'
+  }), { headers })
+
+  const loginRes = http.post(`${BASE_URL}/auth/login`, JSON.stringify({
+    email,
+    password,
+  }), { headers: { 'Content-Type': 'application/json' } })
+
+  errorRate.add(loginRes.status !== 200)
+  check(loginRes, { 'login status 200': (r) => r.status === 200 })
+
+  // 4. Retornar
+  return { token, projectId }
 }
 
 // ── Main scenario ─────────────────────────────────────────────
@@ -68,33 +101,22 @@ export default function (data) {
     'Authorization': `Bearer ${data.token}`,
   }
 
-  // 1. Login
-  const loginRes = http.post(`${BASE_URL}/auth/login`, JSON.stringify({
-    email: `perf-load@test.com`,
-    password: 'Password1',
-  }), { headers: { 'Content-Type': 'application/json' } })
-
-  loginDuration.add(loginRes.timings.duration)
-  errorRate.add(loginRes.status !== 200)
-  check(loginRes, { 'login status 200': (r) => r.status === 200 })
-
-  sleep(0.5)
-
-  // 2. List projects
+  // 1. List projects
   const projectsRes = http.get(`${BASE_URL}/projects`, { headers })
+  listDuration.add(projectsRes.timings.duration)
   check(projectsRes, { 'projects status 200': (r) => r.status === 200 })
   errorRate.add(projectsRes.status !== 200)
 
   sleep(0.3)
 
-  // 3. Get tasks with filter
-  const projectId = projectsRes.json('0.id')
-  if (projectId) {
-    const tasksRes = http.get(`${BASE_URL}/projects/${projectId}/tasks?status=TODO`, { headers })
-    tasksDuration.add(tasksRes.timings.duration)
-    errorRate.add(tasksRes.status !== 200)
-    check(tasksRes, { 'tasks status 200': (r) => r.status === 200 })
-  }
+  // 2. Get tasks with filter
+  const tasksRes = http.get(`${BASE_URL}/projects/${data.projectId}/tasks?status=TODO`, {
+    headers,
+    tags: { name: 'Get Tasks' }
+  })
+  tasksDuration.add(tasksRes.timings.duration)
+  errorRate.add(tasksRes.status !== 200)
+  check(tasksRes, { 'tasks status 200': (r) => r.status === 200 })
 
   sleep(1)
 }
