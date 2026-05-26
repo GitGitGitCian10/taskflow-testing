@@ -1,0 +1,31 @@
+
+Bien:
+
+- Gherkin de US-03: projects.feature tiene escenario happy path (201, columnas, owner) y error (nombre vacío → 400). Sintaxis
+  Given/When/Then correcta, describe comportamiento, no implementación.
+  - Gherkin de US-04: Dos escenarios bien escritos (invitar exitosamente → 200; viewer intenta crear tarea → 403). BDD descriptivo y
+  correcto.
+  - Gherkin de US-05: e2e/features/tasks.feature (happy path con estado TODO + error con prioridad inválida). Limpio y concreto.
+  - Unit tests de US-05: task.service.spec.ts tiene 6 tests que validan reglas de negocio reales: título vacío, < 3 chars, > 100 chars,
+  exactamente en los límites. Es la parte más cuidada del hito.
+  - Lint: 0 errores. Solo 14 warnings menores (console.log, any).
+  - TypeScript: tsc --noEmit desde apps/api/ pasa sin errores.
+
+
+Para arreglar:
+
+- npm run test:bdd ejecuta 0 escenarios. El script apunta al workspace apps/api, que no tiene ni feature files ni configuración de
+  Cucumber. Las features viven en taskflow-bdd/ que no está declarado como workspace en el package.json raíz. El comando que pide la rúbrica
+  no corre nada.
+  - Cuando se ejecuta desde taskflow-bdd/, los 14 escenarios fallan con "ambiguous". El mismo step la respuesta tiene código de estado {int}
+  está definido en los tres archivos de steps (auth.steps.js, projects.steps.js, tasks.steps.js). Cucumber no puede resolver cuál usar.
+  Ningún US pasa. Evidencia:
+  14 scenarios (14 ambiguous)
+  96 steps (23 ambiguous, 10 skipped, 63 passed)
+  - Sin unit tests ni integration tests para US-03 y US-04. No existe ningún archivo que cubra ProjectService o rutas de proyectos. Solo hay
+  cobertura para US-05 (parcial: el test de 400 — título vacío falla devolviendo 500 en lugar de 400, porque el route no mapea el nombre de
+  error del mock al código HTTP correspondiente).
+  - Integration tests de US-01/02 también fallan (auth.routes.spec.ts: 6/8 tests rompen con Cannot read properties of undefined (reading 
+  'value')). No afecta este hito directamente pero afecta al proyecto como un todo.
+
+CALIFICACIÓN: 47/100
