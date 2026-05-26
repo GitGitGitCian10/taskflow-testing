@@ -1,5 +1,5 @@
 // tests/integration/auth.routes.spec.ts
-import { describe, it, expect, vi } from 'vitest'
+import { describe, it, expect, vi, beforeAll } from 'vitest'
 import request from 'supertest'
 import { createApp } from '../../src/app'
 
@@ -23,8 +23,13 @@ import { AuthService, ConflictError, UnauthorizedError } from '../../src/service
 
 const app = createApp()
 
+let authServiceMock: any
+beforeAll(() => {
+  authServiceMock = (AuthService as any).mock.results[0].value
+})
+
 function getAuthServiceMock() {
-  return (AuthService as any).mock.results[0].value
+  return authServiceMock
 }
 
 // ════════════════════════════════════════════════════════════════

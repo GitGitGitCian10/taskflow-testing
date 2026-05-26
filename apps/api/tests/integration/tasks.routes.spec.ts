@@ -54,8 +54,8 @@ describe('POST /projects/:projectId/tasks', () => {
         expect(res.body.title).toBe('Implementar Login')
     })
     it('400 — título vacío', async () => {
-        const titleError = new Error('Title is required');
-        titleError.name = 'titleError';
+        const titleError: any = new Error(JSON.stringify([{ message: 'Title is required' }]));
+        titleError.name = 'ZodError';
         taskServiceMock.createTask.mockRejectedValueOnce(titleError);
 
         const res = await request(app)
