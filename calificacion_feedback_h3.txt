@@ -1,0 +1,12 @@
+Muy bien:
+- Integration tests reales con DB sin mocks. El flujo completo funciona end-to-end.
+- US-03 cubierta al 100%.
+- Gherkin de calidad.
+- Pact completo y sin failures.
+- Coverage saltó de 53% a 85.59%: project.service.spec.ts y comment.service.spec.ts nuevos cubren los servicios que antes tenían 0% !!!
+
+Para corregir:
+
+- US-05 falta el test "status inicial distinto de TODO → 400"
+
+Calificacion: 98/100
