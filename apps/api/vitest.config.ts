@@ -7,7 +7,7 @@ export default defineConfig({
     coverage: {
       provider: 'v8',
       reporter: ['text', 'json', 'html'],
-      include: ['src/services/**'],
+      include: ['apps/api/src/services/**'],
       thresholds: {
         lines: 50,
         functions: 40,
@@ -15,6 +15,10 @@ export default defineConfig({
         branches: 75
       }
     },
-    setupFiles: ['./tests/setup.ts'],
+    reporters: [
+      'default',
+      ['allure-vitest/reporter', { resultsDir: 'allure-results' }]
+    ],
+    setupFiles: ['./apps/api/tests/setup.ts', 'allure-vitest/setup'],
   },
 })
