@@ -1,0 +1,19 @@
+
+Lo que hicieron bien
+
+Los tres bugs corregidos.
+token del setup() propagado correctamente, datos dinámicos con Date.now(), endpoint anidado /projects/${projectId}/tasks correcto.
+setup() completo: registro → proyecto → tarea → return { token, projectId }, sin depender del seed.
+Métricas custom y thresholds SLO bien definidos. 
+Dos escenarios (load y spike) correctamente configurados con startTime: '3m' para evitar superposición.
+
+
+Lo que hay que corregir
+
+Login redundante en setup() — el token ya se obtuvo del register. 
+La llamada a /auth/login dentro del setup no se usa para nada y agrega ruido.
+errorRate.add() dentro del setup() — las métricas de carga deben alimentarse solo desde la default function, no desde el setup. 
+Mezclarlas distorsiona los resultados.
+No entregaron el análisis escrito ni resultados-clase9.md — ambos eran entregables obligatorios del hito.
+
+CALIFICACION: 62/100
