@@ -5,7 +5,7 @@ import { ProjectListPage } from '../pages/ProjectListPage'
 test.describe('US-03: Crear proyecto', () => {
     test.beforeEach(async ({ page }) => {
         const loginPage = new LoginPage(page)
-        const email = `user_${Date.now()}@test.com`
+        const email = `user_${Date.now()}_${Math.random().toString(36).substring(2, 7)}@test.com`
         const password = 'Password123'
         await loginPage.register(email, password, 'Test User')
         await loginPage.expectRedirectToLogin()

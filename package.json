@@ -2,32 +2,64 @@
   "name": "taskflow",
   "private": true,
   "workspaces": [
-    "apps/api",
-    "apps/web"
+    "apps/web",
+    "taskflow-bdd"
   ],
   "scripts": {
-    "dev": "concurrently \"npm run dev --workspace=apps/api\" \"npm run dev --workspace=apps/web\"",
-    "lint": "npm run lint --workspaces --if-present",
-    "typecheck": "npm run typecheck --workspaces --if-present",
-    "test:unit": "npm run test:unit --workspace=apps/api",
-    "test:integration": "npm run test:integration --workspace=apps/api",
+    "postinstall": "prisma generate --schema=apps/api/src/prisma/schema.prisma",
+    "dev:api": "dotenv -e apps/api/.env -- tsx watch apps/api/src/index.ts",
+    "dev:web": "npm run dev --workspace=apps/web",
+    "dev": "concurrently \"npm run dev:api\" \"npm run dev:web\"",
+    "build:api": "tsc --project apps/api/tsconfig.json",
+    "build:web": "npm run build --workspace=apps/web",
+    "start:api": "dotenv -e apps/api/.env -- node apps/api/dist/index.js",
+    "lint:api": "eslint apps/api/src apps/api/tests",
+    "lint": "eslint apps/api/src apps/api/tests && npm run lint --workspaces --if-present",
+    "typecheck": "tsc --noEmit --project apps/api/tsconfig.json && npm run typecheck --workspaces --if-present",
+    "test:unit": "vitest run --root apps/api tests/unit --coverage",
+    "test:integration": "dotenv -e apps/api/.env.test -- vitest run --root apps/api tests/projects.integration.test.ts tests/tasks.integration.test.ts --no-file-parallelism",
+    "test:integration:mocked": "vitest run --root apps/api tests/integration",
+    "test:pact": "dotenv -e apps/api/.env.test -- vitest run --root apps/api tests/pact",
     "test:bdd": "npm test --prefix taskflow-bdd",
     "test:e2e": "npx playwright test",
     "test:mobile": "cd mobile && npx wdio run wdio.conf.ts",
     "test:all": "npm run test:unit && npm run test:integration && npm run test:bdd && npm run test:e2e",
-    "dev:web": "npm run dev --workspace=apps/web",
-    "build:web": "npm run build --workspace=apps/web"
+    "db:migrate:test": "dotenv -e apps/api/.env.test -- prisma migrate deploy --schema=apps/api/src/prisma/schema.prisma"
+  },
+  "dependencies": {
+    "@prisma/client": "^5.14.0",
+    "bcryptjs": "^2.4.3",
+    "cors": "^2.8.5",
+    "express": "^4.19.2",
+    "jsonwebtoken": "^9.0.2",
+    "zod": "^3.23.8"
+  },
+  "prisma": {
+    "schema": "apps/api/src/prisma/schema.prisma",
+    "seed": "tsx apps/api/src/prisma/seed.ts"
   },
   "devDependencies": {
     "@cucumber/cucumber": "^10.8.0",
     "@eslint/js": "^10.0.1",
     "@pact-foundation/pact": "^16.5.0",
     "@playwright/test": "^1.44.0",
+    "@types/bcryptjs": "^2.4.6",
+    "@types/cors": "^2.8.17",
+    "@types/express": "^4.17.21",
+    "@types/jsonwebtoken": "^9.0.6",
+    "@types/node": "^20.14.2",
+    "@types/supertest": "^6.0.2",
     "@typescript-eslint/eslint-plugin": "^8.58.0",
     "@typescript-eslint/parser": "^8.58.0",
+    "@vitest/coverage-v8": "^1.6.0",
     "concurrently": "^8.2.2",
     "dotenv-cli": "^11.0.0",
+    "eslint": "^9.4.0",
     "globals": "^17.4.0",
-    "typescript": "^5.4.5"
+    "prisma": "^5.14.0",
+    "supertest": "^7.0.0",
+    "tsx": "^4.11.2",
+    "typescript": "^5.4.5",
+    "vitest": "^1.6.0"
   }
 }

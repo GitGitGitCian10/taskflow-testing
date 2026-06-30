@@ -9,27 +9,27 @@ import { createApp } from '../../src/app'
 
 vi.mock('../../src/services/auth.service', async (importOriginal) => {
   const actual = await importOriginal<typeof import('../../src/services/auth.service')>()
+  const mockInstance = {
+    register: vi.fn(),
+    login: vi.fn(),
+    verifyToken: vi.fn(),
+  }
+  ;(globalThis as any).authServiceMock = mockInstance
   return {
     ...actual,
-    AuthService: vi.fn().mockImplementation(() => ({
-      register: vi.fn(),
-      login: vi.fn(),
-      verifyToken: vi.fn(),
-    })),
+    AuthService: vi.fn().mockImplementation(() => mockInstance),
   }
 })
 
-import { AuthService, ConflictError, UnauthorizedError } from '../../src/services/auth.service'
+import { ConflictError, UnauthorizedError, ValidationError } from '../../src/services/auth.service'
 
-const app = createApp()
+let app: any
 
-// Capturamos la instancia mockeada UNA sola vez. No puede leerse dentro de cada
-// test porque el afterEach global (tests/setup.ts) hace vi.clearAllMocks(), que
-// vacía AuthService.mock.results. Las implementaciones se setean por test.
-let authServiceMock: any
 beforeAll(() => {
-  authServiceMock = (AuthService as any).mock.results[0].value
+  app = createApp()
 })
+
+const authServiceMock = (globalThis as any).authServiceMock
 
 // ════════════════════════════════════════════════════════════════
 // POST /auth/register
@@ -66,7 +66,7 @@ describe('POST /auth/register', () => {
 
   it('400 — password débil', async () => {
     authServiceMock.register.mockRejectedValue(
-      Object.assign(new Error('Validation error'), { statusCode: 400 })
+      new ValidationError('Validation error')
     )
 
     const res = await request(app)
@@ -78,7 +78,7 @@ describe('POST /auth/register', () => {
 
   it('400 — email con formato inválido', async () => {
     authServiceMock.register.mockRejectedValue(
-      Object.assign(new Error('Invalid email format'), { statusCode: 400 })
+      new ValidationError('Invalid email format')
     )
 
     const res = await request(app)

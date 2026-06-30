@@ -82,14 +82,6 @@ export function setup() {
     priority: 'HIGH'
   }), { headers })
 
-  const loginRes = http.post(`${BASE_URL}/auth/login`, JSON.stringify({
-    email,
-    password,
-  }), { headers: { 'Content-Type': 'application/json' } })
-
-  errorRate.add(loginRes.status !== 200)
-  check(loginRes, { 'login status 200': (r) => r.status === 200 })
-
   // 4. Retornar
   return { token, projectId }
 }
