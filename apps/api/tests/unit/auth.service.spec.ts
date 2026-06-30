@@ -179,32 +179,50 @@ describe('AuthService.login — US-02', () => {
   })
 
   describe('Criterio 3: bloqueo por intentos fallidos', () => {
-    it('bloquea la cuenta después de 5 intentos fallidos — BUG-05', async () => {
+    it('bloquea la cuenta en el 5º intento fallido — BUG-05', async () => {
       const hash = await bcrypt.hash('Password1', 12)
-      // Simula usuario con 5 intentos fallidos exactos (justo en el límite)
+      // Estado inicial: 4 intentos fallidos. El próximo (incorrecto) es el 5º.
       mockDb.user.findUnique.mockResolvedValue({
         ...mockUser,
         passwordHash: hash,
-        failedLogins: 5,
+        failedLogins: 4,
         lockedUntil: null,
       })
       mockDb.user.update.mockResolvedValue({})
 
-      // Con password incorrecto en el intento 6 (failedLogins llega a 6)
-      // El bug: la cuenta debería haberse bloqueado en el intento 5
-      // Con el bug activo, este test pasa como UnauthorizedError sin lock
-      // La validación correcta sería que la cuenta YA esté bloqueada
-
-      // Este test documenta el comportamiento buggy:
+      // 5º intento con password incorrecto → debe bloquear la cuenta.
       await expect(
         authService.login({ email: 'ana@test.com', password: 'WrongPass1' })
       ).rejects.toThrow(UnauthorizedError)
 
-      // Verificar que se llamó update con lockedUntil establecido
       const updateCall = mockDb.user.update.mock.calls[0][0]
+      // failedLogins debe llegar a 5...
+      expect(updateCall.data.failedLogins).toBe(5)
+      // ...y la cuenta debe quedar bloqueada en ese mismo intento.
+      // Con el BUG-05 activo (newFailedCount > 5) esto FALLA, porque 5 > 5 es false.
+      // Con el fix (newFailedCount >= 5) lockedUntil queda definido y el test PASA.
       expect(updateCall.data.lockedUntil).toBeDefined()
-      // BUG: lockedUntil solo se setea cuando failedLogins > 5, no >= 5
-      // En este caso failedLogins llegaría a 6 y recién ahí se bloquea
+      expect(updateCall.data.lockedUntil).not.toBeNull()
+    })
+
+    it('NO bloquea la cuenta en el 4º intento fallido', async () => {
+      const hash = await bcrypt.hash('Password1', 12)
+      // Estado inicial: 3 intentos. El próximo (incorrecto) es el 4º → aún sin bloqueo.
+      mockDb.user.findUnique.mockResolvedValue({
+        ...mockUser,
+        passwordHash: hash,
+        failedLogins: 3,
+        lockedUntil: null,
+      })
+      mockDb.user.update.mockResolvedValue({})
+
+      await expect(
+        authService.login({ email: 'ana@test.com', password: 'WrongPass1' })
+      ).rejects.toThrow(UnauthorizedError)
+
+      const updateCall = mockDb.user.update.mock.calls[0][0]
+      expect(updateCall.data.failedLogins).toBe(4)
+      expect(updateCall.data.lockedUntil).toBeNull()
     })
 
     it('respeta el bloqueo si lockedUntil está en el futuro', async () => {

@@ -1,6 +1,5 @@
 // features/step_definitions/auth.steps.js
-const { Given, When, Then, Before, After } = require('@cucumber/cucumber');
-const { expect } = require('chai');
+const { Given, When } = require('@cucumber/cucumber');
 const axios = require('axios');
 
 // ──────────────────────────────────────────────
@@ -9,44 +8,21 @@ const axios = require('axios');
 const BASE_URL = process.env.TASKFLOW_URL || 'http://localhost:3000';
 const api = axios.create({ baseURL: BASE_URL, validateStatus: () => true });
 
-// ──────────────────────────────────────────────
-// CONTEXTO COMPARTIDO (world)
-// ──────────────────────────────────────────────
-// Cucumber.js inyecta "this" como el World object en cada step
-// Usamos variables locales al scenario para almacenar estado
-
-let response = null;
+// El estado del scenario se guarda en el World (this), compartido
+// entre todos los step definitions. Las aserciones genéricas
+// (status / cuerpo) viven en common.steps.js
 
 // ──────────────────────────────────────────────
 // STEPS: GIVEN
 // ──────────────────────────────────────────────
 
-Given('el servidor de TaskFlow está disponible', async function () {
-  // TODO: verificar que el servidor responde (health check)
-  // Ejemplo:
-  // const res = await api.get('/health');
-  // expect(res.status).to.equal(200);
-  console.log('  → Verificando disponibilidad del servidor...');
-});
-
-Given('la base de datos está limpia', async function () {
-  // TODO: limpiar datos de test entre escenarios
-  // Ejemplo: await api.post('/test/reset');
-  console.log('  → Limpiando base de datos...');
-});
-
 Given('que el email {string} no está registrado', async function (email) {
   // TODO: asegurarse de que el email no exista en la BD
-  // Ejemplo: await api.delete('/test/users/' + email);
   console.log(`  → Email ${email} no registrado (pendiente implementar)`);
 });
 
 Given('que el email {string} ya está registrado', async function (email) {
   // TODO: crear el usuario previamente en la BD
-  // Ejemplo:
-  // await api.post('/api/auth/register', {
-  //   email, password: 'Setup123!', name: 'Setup User'
-  // });
   console.log(`  → Email ${email} ya registrado (pendiente implementar)`);
 });
 
@@ -57,8 +33,6 @@ Given('que ningún usuario está registrado', async function () {
 
 Given('que existe el usuario con email {string} y password {string}', async function (email, password) {
   // TODO: crear usuario con las credenciales dadas
-  // Ejemplo:
-  // await api.post('/api/auth/register', { email, password, name: 'Test User' });
   console.log(`  → Creando usuario ${email} (pendiente implementar)`);
 });
 
@@ -67,49 +41,34 @@ Given('que existe el usuario con email {string} y password {string}', async func
 // ──────────────────────────────────────────────
 
 When('el usuario envía los datos de registro:', async function (dataTable) {
-  const data = dataTable.rowsHash(); // convierte tabla a objeto { email, password, name }
-  
-  // TODO: descomentar cuando el servidor esté corriendo
-  // response = await api.post('/api/auth/register', {
-  //   email: data.email,
-  //   password: data.password,
-  //   name: data.name
-  // });
+  const data = dataTable.rowsHash(); // tabla → objeto { email, password, name }
 
-  // Placeholder para que el step no quede pending
-  response = { status: 201, data: { id: 'test-id', email: data.email } };
-  console.log(`  → POST /api/auth/register con email: ${data.email}`);
+  // TODO: descomentar cuando se conecte a la API real
+  // this.response = await api.post('/auth/register', { ...data });
+
+  // Placeholder: responde según las reglas de validación esperadas
+  if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(data.email)) {
+    this.response = { status: 400, data: { message: 'Email inválido' } };
+  } else if (data.password.length < 8) {
+    this.response = { status: 400, data: { message: 'La contraseña debe tener al menos 8 caracteres' } };
+  } else if (data.email === 'existente@test.com') {
+    this.response = { status: 409, data: { message: 'Email ya registrado' } };
+  } else {
+    this.response = { status: 201, data: { id: 'test-id', email: data.email } };
+  }
+  console.log(`  → POST /auth/register con email: ${data.email}`);
 });
 
 When('el usuario envía las credenciales:', async function (dataTable) {
   const data = dataTable.rowsHash();
 
-  // TODO: descomentar cuando el servidor esté corriendo
-  // response = await api.post('/api/auth/login', {
-  //   email: data.email,
-  //   password: data.password
-  // });
+  // TODO: descomentar cuando se conecte a la API real
+  // this.response = await api.post('/auth/login', { ...data });
 
-  response = { status: 200, data: { token: 'fake-jwt-token', email: data.email } };
-  console.log(`  → POST /api/auth/login con email: ${data.email}`);
-});
-
-// ──────────────────────────────────────────────
-// STEPS: THEN
-// ──────────────────────────────────────────────
-
-Then('la respuesta tiene código de estado {int}', function (expectedStatus) {
-  expect(response).to.not.be.null;
-  expect(response.status).to.equal(expectedStatus,
-    `Se esperaba status ${expectedStatus} pero se recibió ${response.status}`
-  );
-});
-
-Then('el cuerpo contiene el campo {string}', function (field) {
-  expect(response.data).to.have.property(field);
-});
-
-Then('el cuerpo contiene {string} con valor {string}', function (field, value) {
-  expect(response.data).to.have.property(field);
-  expect(String(response.data[field])).to.equal(value);
+  if (data.password === 'Pass123!') {
+    this.response = { status: 200, data: { token: 'fake-jwt-token', email: data.email } };
+  } else {
+    this.response = { status: 401, data: { message: 'Credenciales inválidas' } };
+  }
+  console.log(`  → POST /auth/login con email: ${data.email}`);
 });

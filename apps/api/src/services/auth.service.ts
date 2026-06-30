@@ -80,10 +80,10 @@ export class AuthService {
     if (!isValid) {
       const newFailedCount = user.failedLogins + 1
 
-      // BUG-05: lock only applied if attempts >= threshold, not >
-      // This means at exactly 5 fails, lock is not yet applied.
-      // Fix would be: newFailedCount >= MAX_FAILED_ATTEMPTS
-      const shouldLock = newFailedCount > MAX_FAILED_ATTEMPTS
+      // BUG-05 (corregido): la cuenta se bloquea AL alcanzar el umbral.
+      // Antes: newFailedCount > MAX_FAILED_ATTEMPTS → recién bloqueaba en el 6º intento.
+      // Ahora: newFailedCount >= MAX_FAILED_ATTEMPTS → bloquea en el 5º intento.
+      const shouldLock = newFailedCount >= MAX_FAILED_ATTEMPTS
 
       await this.db.user.update({
         where: { id: user.id },

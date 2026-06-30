@@ -9,10 +9,14 @@
     "start": "node dist/index.js",
     "lint": "eslint src tests",
     "typecheck": "tsc --noEmit",
+    "test": "dotenv -e .env.test --override -- vitest run --no-file-parallelism",
     "test:unit": "vitest run tests/unit --coverage",
-    "test:integration": "vitest run tests/integration",
+    "test:integration": "dotenv -e .env.test --override -- vitest run tests/projects.integration.test.ts tests/tasks.integration.test.ts --no-file-parallelism",
+    "test:integration:mocked": "vitest run tests/integration",
+    "test:pact": "dotenv -e .env.test --override -- vitest run tests/pact",
     "test:bdd": "cucumber-js",
-    "test:watch": "vitest"
+    "test:watch": "dotenv -e .env.test --override -- vitest",
+    "db:migrate:test": "dotenv -e .env.test --override -- prisma migrate deploy --schema=src/prisma/schema.prisma"
   },
   "dependencies": {
     "@prisma/client": "^5.14.0",

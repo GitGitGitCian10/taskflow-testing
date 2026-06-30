@@ -54,8 +54,9 @@ describe('POST /projects/:projectId/tasks', () => {
         expect(res.body.title).toBe('Implementar Login')
     })
     it('400 — título vacío', async () => {
-        const titleError = new Error('Title is required');
-        titleError.name = 'titleError';
+        // El errorHandler mapea el status desde err.statusCode (?? 500),
+        // así que el error simulado debe llevar statusCode: 400.
+        const titleError = Object.assign(new Error('Title is required'), { statusCode: 400 });
         taskServiceMock.createTask.mockRejectedValueOnce(titleError);
 
         const res = await request(app)
