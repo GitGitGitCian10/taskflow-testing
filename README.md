@@ -1,5 +1,7 @@
 # TaskFlow 🗂️
 
+![CI](https://github.com/GitGitGitCian10/taskflow-testing/actions/workflows/ci.yml/badge.svg)
+
 Proyecto integrador del curso **Testing y Calidad de Software**.
 App de gestión de tareas (tipo Jira simplificado) con suite completa de tests.
 

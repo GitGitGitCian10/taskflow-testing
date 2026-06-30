@@ -1,5 +1,5 @@
 // tests/integration/auth.routes.spec.ts
-import { describe, it, expect, vi } from 'vitest'
+import { describe, it, expect, vi, beforeAll } from 'vitest'
 import request from 'supertest'
 import { createApp } from '../../src/app'
 
@@ -9,23 +9,27 @@ import { createApp } from '../../src/app'
 
 vi.mock('../../src/services/auth.service', async (importOriginal) => {
   const actual = await importOriginal<typeof import('../../src/services/auth.service')>()
+  const mockInstance = {
+    register: vi.fn(),
+    login: vi.fn(),
+    verifyToken: vi.fn(),
+  }
+  ;(globalThis as any).authServiceMock = mockInstance
   return {
     ...actual,
-    AuthService: vi.fn().mockImplementation(() => ({
-      register: vi.fn(),
-      login: vi.fn(),
-      verifyToken: vi.fn(),
-    })),
+    AuthService: vi.fn().mockImplementation(() => mockInstance),
   }
 })
 
-import { AuthService, ConflictError, UnauthorizedError } from '../../src/services/auth.service'
+import { ConflictError, UnauthorizedError, ValidationError } from '../../src/services/auth.service'
 
-const app = createApp()
+let app: any
 
-function getAuthServiceMock() {
-  return (AuthService as any).mock.results[0].value
-}
+beforeAll(() => {
+  app = createApp()
+})
+
+const authServiceMock = (globalThis as any).authServiceMock
 
 // ════════════════════════════════════════════════════════════════
 // POST /auth/register
@@ -33,7 +37,7 @@ function getAuthServiceMock() {
 describe('POST /auth/register', () => {
 
   it('201 — registro exitoso devuelve user y token', async () => {
-    getAuthServiceMock().register.mockResolvedValue({
+    authServiceMock.register.mockResolvedValue({
       user: { id: 'user-1', email: 'ana@test.com', name: 'Ana' },
       token: 'jwt.token.here',
     })
@@ -48,7 +52,7 @@ describe('POST /auth/register', () => {
   })
 
   it('409 — email ya registrado', async () => {
-    getAuthServiceMock().register.mockRejectedValue(
+    authServiceMock.register.mockRejectedValue(
       new ConflictError('Email already registered')
     )
 
@@ -61,8 +65,8 @@ describe('POST /auth/register', () => {
   })
 
   it('400 — password débil', async () => {
-    getAuthServiceMock().register.mockRejectedValue(
-      Object.assign(new Error('Validation error'), { statusCode: 400 })
+    authServiceMock.register.mockRejectedValue(
+      new ValidationError('Validation error')
     )
 
     const res = await request(app)
@@ -73,8 +77,8 @@ describe('POST /auth/register', () => {
   })
 
   it('400 — email con formato inválido', async () => {
-    getAuthServiceMock().register.mockRejectedValue(
-      Object.assign(new Error('Invalid email format'), { statusCode: 400 })
+    authServiceMock.register.mockRejectedValue(
+      new ValidationError('Invalid email format')
     )
 
     const res = await request(app)
@@ -91,7 +95,7 @@ describe('POST /auth/register', () => {
 describe('POST /auth/login', () => {
 
   it('200 — login exitoso devuelve token', async () => {
-    getAuthServiceMock().login.mockResolvedValue({
+    authServiceMock.login.mockResolvedValue({
       user: { id: 'user-1', email: 'ana@test.com', name: 'Ana' },
       token: 'jwt.token.here',
     })
@@ -105,7 +109,7 @@ describe('POST /auth/login', () => {
   })
 
   it('401 — credenciales incorrectas', async () => {
-    getAuthServiceMock().login.mockRejectedValue(
+    authServiceMock.login.mockRejectedValue(
       new UnauthorizedError('Invalid credentials')
     )
 
@@ -118,7 +122,7 @@ describe('POST /auth/login', () => {
   })
 
   it('401 — cuenta bloqueada', async () => {
-    getAuthServiceMock().login.mockRejectedValue(
+    authServiceMock.login.mockRejectedValue(
       new UnauthorizedError('Account locked. Try again in 14 minutes')
     )
 

@@ -19,6 +19,11 @@ Elegimos Vitest para pruebas unitarias por su compatibilidad nativa con el stack
 * **Selenium:** Descartado por su complejidad en el setup y tendencia a generar flaky tests.
 
 ## Consecuencias
-Se unifica el runner de pruebas (unitarias e integración bajo Vitest), simplificando el mantenimiento. El equipo deberá familiarizarse con la API de Playwright, aunque la curva de aprendizaje se reduce al usar TypeScript en todo el stack.
+Se unifica el runner de pruebas (unitarias e integración bajo Vitest), simplificando el mantenimiento. El equipo deberá familiarizarse con la API de Playwright, aunque la curva de aprendizaje se reduce al usar TypeScript en todo el stack. Como deuda aceptada: Vitest tiene un ecosistema de plugins más chico que Jest, Playwright requiere descargar browsers (~300 MB) en CI, y mantener Postman+Newman implica versionar la colección y el environment además de los tests del repo.
 
 ## Links y referencias
+* Vitest — https://vitest.dev/
+* Playwright — https://playwright.dev/
+* Supertest — https://github.com/ladjs/supertest
+* Newman — https://github.com/postmanlabs/newman
+* Workshop Clase 6 (documento completo con tablas de evaluación): `entregables/clase6-adr/workshop-clase6-stack-y-adr.md`

@@ -4,7 +4,7 @@ import { LoginPage } from '../pages/LoginPage'
 test.describe('US-01 y US-02: Autenticación', () => {
     test('registro exitoso y posterior inicio de sesión', async ({ page }) => {
         const loginPage = new LoginPage(page)
-        const email = `test_user_${Date.now()}@test.com`
+        const email = `test_user_${Date.now()}_${Math.random().toString(36).substring(2, 7)}@test.com`
         const password = 'Password123'
 
         await loginPage.register(email, password, 'User Name')

@@ -6,7 +6,8 @@
   "scripts": {
     "dev": "vite --port 5173",
     "build": "tsc && vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "test:pact": "vitest run tests/pact"
   },
   "dependencies": {
     "axios": "^1.7.2",

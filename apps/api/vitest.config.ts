@@ -9,9 +9,9 @@ export default defineConfig({
       reporter: ['text', 'json', 'html'],
       include: ['src/services/**'],
       thresholds: {
-        lines: 30,
-        functions: 40,
-        statements: 30,
+        lines: 80,
+        functions: 80,
+        statements: 80,
         branches: 75
       }
     },

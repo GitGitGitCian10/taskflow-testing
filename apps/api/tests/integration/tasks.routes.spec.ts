@@ -1,20 +1,22 @@
 import { describe, it, expect, vi, beforeAll, type MockedObject } from 'vitest'
 import request from 'supertest'
 import { createApp } from '../../src/app'
+import { ValidationError } from '../../src/services/auth.service'
+
 vi.mock('../../src/services/task.service', async (importOriginal) => {
-    const actual = await importOriginal<typeof import('../../src/services/task.service')>
-        ()
+    const actual = await importOriginal<typeof import('../../src/services/task.service')>()
+    const mockInstance = {
+        createTask: vi.fn(),
+        getTasks: vi.fn(),
+    }
+    ;(globalThis as any).taskServiceMock = mockInstance
     return {
         ...actual,
-        TaskService: vi.fn().mockImplementation(() => ({
-            createTask: vi.fn(),
-            getTasks: vi.fn(),
-        })),
+        TaskService: vi.fn().mockImplementation(() => mockInstance),
     }
 })
 vi.mock('../../src/services/auth.service', async (importOriginal) => {
-    const actual = await importOriginal<typeof import('../../src/services/auth.service')>
-        ()
+    const actual = await importOriginal<typeof import('../../src/services/auth.service')>()
     return {
         ...actual,
         AuthService: vi.fn().mockImplementation(() => ({
@@ -22,14 +24,13 @@ vi.mock('../../src/services/auth.service', async (importOriginal) => {
         })),
     }
 })
-import { TaskService } from '../../src/services/task.service'
 import type { TaskService as TaskServiceType } from '../../src/services/task.service'
-const app = createApp()
-const VALID_TOKEN = 'Bearer valid.jwt.token'
-let taskServiceMock: MockedObject<TaskServiceType>
+let app: any
 beforeAll(() => {
-    taskServiceMock = (TaskService as ReturnType<typeof vi.fn>).mock.results[0].value
+    app = createApp()
 })
+const VALID_TOKEN = 'Bearer valid.jwt.token'
+const taskServiceMock = (globalThis as any).taskServiceMock as unknown as MockedObject<TaskServiceType>
 
 describe('POST /projects/:projectId/tasks', () => {
     it('201 — crea tarea y devuelve el objeto creado', async () => {
@@ -54,8 +55,7 @@ describe('POST /projects/:projectId/tasks', () => {
         expect(res.body.title).toBe('Implementar Login')
     })
     it('400 — título vacío', async () => {
-        const titleError = new Error('Title is required');
-        titleError.name = 'titleError';
+        const titleError = new ValidationError('Title is required');
         taskServiceMock.createTask.mockRejectedValueOnce(titleError);
 
         const res = await request(app)

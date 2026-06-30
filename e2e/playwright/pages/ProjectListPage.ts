@@ -1,4 +1,4 @@
-import { Page, expect } from 'playwright/test'
+import { Page, expect } from '@playwright/test'
 
 export class ProjectListPage {
     constructor(private page: Page) { }
@@ -26,5 +26,9 @@ export class ProjectListPage {
         await expect(
             this.page.getByTestId('project-card')
         ).toHaveCount(count)
+    }
+
+    async openProject(name: string) {
+        await this.page.getByTestId('project-card').filter({ hasText: name }).click()
     }
 }
