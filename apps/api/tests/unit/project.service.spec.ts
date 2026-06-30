@@ -1,5 +1,6 @@
 // tests/unit/project.service.spec.ts
 import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { bindAllureApi } from 'allure-vitest'
 import { ProjectService } from '../../src/services/project.service'
 import { ConflictError, ForbiddenError, NotFoundError } from '../../src/services/auth.service'
 
@@ -21,7 +22,13 @@ describe('ProjectService — US-03 / US-04', () => {
   })
 
   describe('createProject', () => {
-    it('crea un proyecto cuando el nombre no existe', async () => {
+    it('crea un proyecto cuando el nombre no existe', async (context) => {
+      const allure = bindAllureApi(context.task)
+      await allure.feature('Proyectos')
+      await allure.story('US-03')
+      await allure.severity('critical')
+      await allure.description('Verifica que un usuario autenticado puede crear un proyecto con nombre único.')
+
       mockDb.project.findFirst.mockResolvedValue(null)
       mockDb.project.create.mockResolvedValue({ id: 'proj-1', name: 'Mi Proyecto', ownerId: 'user-1' })
 

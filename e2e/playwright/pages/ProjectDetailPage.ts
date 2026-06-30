@@ -4,10 +4,15 @@ export class ProjectDetailPage {
     constructor(private page: Page) { }
 
     async createTask(title: string, priority: string) {
-        await this.page.getByTestId('create-task-btn').click()
-        await this.page.getByTestId('task-title-input').fill(title)
+        const titleInput = this.page.getByTestId('task-title-input')
+        if (!await titleInput.isVisible()) {
+            await this.page.getByTestId('create-task-btn').click()
+            await expect(titleInput).toBeVisible()
+        }
+        await titleInput.fill(title)
         await this.page.locator('form select').selectOption(priority)
         await this.page.getByTestId('task-submit').click()
+        await expect(titleInput).toBeHidden()
     }
 
     async filterTasksByStatus(status: string) {

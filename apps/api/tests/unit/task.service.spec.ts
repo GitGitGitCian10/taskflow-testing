@@ -1,5 +1,6 @@
 // tests/unit/task.service.spec.ts
 import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { bindAllureApi } from 'allure-vitest'
 import { TaskService } from '../../src/services/task.service'
 
 const mockDb = {
@@ -45,7 +46,13 @@ describe('TaskService', () => {
     describe('createTask', () => {
         beforeEach(() => { vi.clearAllMocks() })
 
-        it('crea la tarea si el usuario es miembro del proyecto', async () => {
+        it('crea la tarea si el usuario es miembro del proyecto', async (context) => {
+            const allure = bindAllureApi(context.task)
+            await allure.feature('Tareas')
+            await allure.story('US-05')
+            await allure.severity('normal')
+            await allure.description('Un miembro del proyecto puede crear una tarea con prioridad válida.')
+
             mockDb.projectMember.findUnique.mockResolvedValue({ userId: 'user-1', role: 'MEMBER' })
             mockDb.task.create.mockResolvedValue({ id: 'task-1', title: 'Implementar login', status: 'TODO' })
 

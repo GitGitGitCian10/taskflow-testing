@@ -154,3 +154,55 @@
   - **BUG-03** (regex de password) y **BUG-04** (mensajes en inglés): ya corregidos en `auth.service.ts`.
   - **+30 unit tests nuevos** (`ProjectService`, `CommentService`, `TaskService`) para que el gate de 80% pase en verde — cobertura subió de 53.76% → **95.69%**.
 - Estado: **55 unit tests passing**, coverage gate OK (exit 0), lint 0 errores, tsc limpio.
+
+---
+
+## Clase 11 — Test Management, Métricas y Reporting (Allure)
+
+📁 `clase11-allure-reporting/`
+
+| Archivo | Descripción |
+|---|---|
+| `clase11-allure-resumen.md` | Config de Allure, tabla de los 5 tests anotados, y el Reporte Ejecutivo de Testing completo (secciones A–F) |
+| `allure-overview.png` | Dashboard de Allure (Overview): 55 test cases, 100% |
+| `allure-behaviors.png` | Vista Behaviors con las features anotadas (Autenticación, Proyectos, Tareas) |
+
+- **Cambios en el repo:**
+  - `apps/api/vitest.config.ts`: reporter `allure-vitest` + setup.
+  - `package.json` raíz: scripts `allure:generate` / `allure:open` / `allure:report`.
+  - `.gitignore`: `allure-results/` + `allure-report/`.
+  - 5 tests unit anotados con `feature`/`story`/`severity`/`link` (`bindAllureApi`).
+  - Shim de tipos `apps/api/tests/types/allure-vitest.d.ts`.
+- Estado: **55 unit tests passing**, `allure-results/` generado con metadata verificada, tsc/lint OK.
+- ⚠️ Se usó **allure-vitest v2** (compat. Vitest 1.6). El **HTML de Allure requiere Java** (el guión dice lo contrario, pero es falso: `allure-commandline` no trae JRE). Se instaló Temurin JRE 21 y se generó el dashboard real (ver capturas).
+
+---
+
+## Clase 12 — Testing con Inteligencia Artificial (Módulo 2 — Práctica)
+
+📁 `clase12-testing-con-ia/`
+
+| Archivo | Descripción |
+|---|---|
+| `clase12-testing-con-ia-resumen.md` | Documento completo de las 3 partes: prompts (Chaining/Few-Shot/Meta) con outputs, evaluación (métricas, alucinaciones, consistencia, sesgos) y reflexión + refinamiento |
+
+- **Práctica conceptual** sobre US-05 y US-07: el LLM se usa en doble rol (herramienta que genera test cases y sistema bajo prueba que evaluamos).
+- **Anclado a la spec real** del repo (`apps/api/src/services/task.service.ts`, `routes/project.routes.ts`) para distinguir comportamiento real vs alucinado.
+- Alucinaciones detectadas y documentadas: `status=PENDING → 400` (inexistente), `search=""→todas`, ordenamiento `createdAt` inventado, y **CA-05d inexistente** inducido por el enunciado.
+- Incluye refinamiento antes/después del prompt del Paso 1 (la alucinación desaparece al cerrar los huecos del prompt).
+
+---
+
+## Clase 12 — Testing de Seguridad y Accesibilidad (Módulo 2)
+
+📁 `clase12-seguridad-accesibilidad/`
+
+| Archivo | Descripción |
+|---|---|
+| `clase12-seguridad-accesibilidad-reporte.md` | Reporte completo: setup, análisis de seguridad (npm audit + curl), auditoría a11y (axe-core), plantillas de hallazgos, User Stories de remediación y checklist |
+| `a11y.spec.ts` | Test de accesibilidad WCAG 2.1 AA (axe-core + Playwright) para Login y Proyectos |
+
+- **Seguridad** (anclado a `apps/api/src/app.ts`): **SEC-01** ausencia de cabeceras de seguridad (sin `helmet`: falta CSP/HSTS/X-Frame-Options/X-Content-Type-Options) y **SEC-02** CORS permisivo (`Access-Control-Allow-Origin: *`). IDOR sobre `GET /projects/:projectId` **probado y descartado** (membership check → 403, `project.service.ts:68`).
+- **Accesibilidad** (anclado a `LoginPage.tsx` / `ProjectsPage.tsx`): **ACC-01** labels sin asociar (SC 1.3.1/4.1.2, A), **ACC-02** contraste insuficiente en botones teal-600 (SC 1.4.3, AA), **ACC-03** tarjeta `<li>` clickeable no operable por teclado (SC 2.1.1, A). Fix aplicado: asociación `htmlFor`/`id` en el login.
+- **2 User Stories** de remediación (seguridad + accesibilidad) con 3 CA testables cada una.
+- ⚠️ El entorno no levanta DB/dev server: comandos `curl`/`npx playwright` documentados para correr con el stack arriba; los hallazgos estructurales (headers, CORS, labels, contraste) se afirman leyendo el fuente.

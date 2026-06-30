@@ -1,5 +1,6 @@
 // tests/unit/auth.service.spec.ts
 import { describe, it, expect, vi } from 'vitest'
+import { bindAllureApi } from 'allure-vitest'
 import bcrypt from 'bcryptjs'
 import jwt from 'jsonwebtoken'
 import { AuthService, ConflictError, UnauthorizedError } from '../../src/services/auth.service'
@@ -50,7 +51,13 @@ describe('AuthService.register — US-01', () => {
       ).rejects.toThrow()
     })
 
-    it('acepta email válido', async () => {
+    it('acepta email válido', async (context) => {
+      const allure = bindAllureApi(context.task)
+      await allure.feature('Autenticación')
+      await allure.story('US-01')
+      await allure.severity('blocker')
+      await allure.description('Registro exitoso con email de formato válido devuelve usuario y token.')
+
       mockDb.user.findUnique.mockResolvedValue(null)
       mockDb.user.create.mockResolvedValue({ id: 'user-1', email: 'ana@test.com', name: 'Ana', createdAt: new Date() })
 
@@ -179,7 +186,14 @@ describe('AuthService.login — US-02', () => {
   })
 
   describe('Criterio 3: bloqueo por intentos fallidos', () => {
-    it('bloquea la cuenta en el 5º intento fallido — BUG-05', async () => {
+    it('bloquea la cuenta en el 5º intento fallido — BUG-05', async (context) => {
+      const allure = bindAllureApi(context.task)
+      await allure.feature('Autenticación')
+      await allure.story('US-02')
+      await allure.severity('critical')
+      await allure.link('issue', 'https://github.com/GitGitGitCian10/taskflow-testing/blob/main/BUG-05.md', 'BUG-05')
+      await allure.description('Verifica que la cuenta se bloquea exactamente al 5º intento (off-by-one corregido: > 5 → >= 5).')
+
       const hash = await bcrypt.hash('Password1', 12)
       // Estado inicial: 4 intentos fallidos. El próximo (incorrecto) es el 5º.
       mockDb.user.findUnique.mockResolvedValue({
