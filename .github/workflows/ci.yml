@@ -145,7 +145,7 @@ jobs:
           node-version: ${{ env.NODE_VERSION }}
           cache: 'npm'
       - run: npm ci
-      - run: npx playwright install --with-deps chromium
+      - run: npx playwright install --with-deps chromium webkit
       - run: npx prisma migrate deploy --schema=apps/api/src/prisma/schema.prisma && npx prisma db seed
       - name: Run E2E tests
         run: npm run test:e2e
