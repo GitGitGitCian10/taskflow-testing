@@ -6,6 +6,7 @@
     "taskflow-bdd"
   ],
   "scripts": {
+    "ci": "npm ci",
     "postinstall": "prisma generate --schema=apps/api/src/prisma/schema.prisma",
     "dev:api": "dotenv -e apps/api/.env -- tsx watch apps/api/src/index.ts",
     "dev:web": "npm run dev --workspace=apps/web",
