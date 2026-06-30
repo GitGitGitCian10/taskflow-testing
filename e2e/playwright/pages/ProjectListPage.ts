@@ -27,4 +27,8 @@ export class ProjectListPage {
             this.page.getByTestId('project-card')
         ).toHaveCount(count)
     }
+
+    async openProject(name: string) {
+        await this.page.getByTestId('project-card').filter({ hasText: name }).click()
+    }
 }
