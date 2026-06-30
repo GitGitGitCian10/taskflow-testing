@@ -37,11 +37,11 @@ export class CommentService {
     const isMember = task.project.members.some((m) => m.userId === userId)
     if (!isMember) throw new ForbiddenError('Not a project member')
 
-    // BUG-04: should be orderBy: { createdAt: 'asc' }
+    // BUG-04 (corregido): comentarios ordenados del más viejo al más nuevo.
     return this.db.comment.findMany({
       where: { taskId },
       include: { author: { select: { id: true, email: true, name: true } } },
-      orderBy: { createdAt: 'asc' }, // BUG: descending instead of ascending
+      orderBy: { createdAt: 'asc' },
     })
   }
 

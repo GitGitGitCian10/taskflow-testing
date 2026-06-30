@@ -4,6 +4,10 @@ export default defineConfig({
   test: {
     globals: true,
     environment: 'node',
+    reporters: [
+      'default',
+      ['allure-vitest/reporter', { resultsDir: 'allure-results' }],
+    ],
     coverage: {
       provider: 'v8',
       reporter: ['text', 'json', 'html'],
@@ -15,6 +19,6 @@ export default defineConfig({
         branches: 75
       }
     },
-    setupFiles: ['./tests/setup.ts'],
+    setupFiles: ['./tests/setup.ts', 'allure-vitest/setup'],
   },
 })

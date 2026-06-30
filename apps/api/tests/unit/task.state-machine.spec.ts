@@ -1,5 +1,6 @@
 // tests/unit/task.state-machine.spec.ts
 import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { bindAllureApi } from 'allure-vitest'
 import { TaskService } from '../../src/services/task.service'
 import { Status } from '@prisma/client'
 
@@ -49,7 +50,12 @@ describe('TaskService — máquina de estados (US-06)', () => {
   })
 
   describe('Transiciones INVÁLIDAS', () => {
-    it('transición inválida TODO -> DONE', async () => {
+    it('transición inválida TODO -> DONE', async (context) => {
+      const allure = bindAllureApi(context.task)
+      await allure.feature('Tareas')
+      await allure.story('US-06')
+      await allure.severity('normal')
+      await allure.description('La máquina de estados no permite saltar de TODO directo a DONE.')
       await expect(taskService.validateStatusTransition(Status.TODO, Status.DONE)).rejects.toThrow('Transición de estado inválida: TODO -> DONE')
     })
 

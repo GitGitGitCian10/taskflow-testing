@@ -24,8 +24,7 @@ export type UpdateTaskInput = z.infer<typeof UpdateTaskSchema>
 const VALID_TRANSITIONS: Record<Status, Status[]> = {
   TODO: ['IN_PROGRESS'],
   IN_PROGRESS: ['DONE'],
-  // BUG-01: DONE should have no valid transitions.
-  // This allows DONE -> TODO if payload includes force:true at route level.
+  // BUG-01 (corregido): DONE es estado terminal, sin transiciones de salida.
   DONE: [],
 }
 
@@ -120,10 +119,9 @@ export class TaskService {
         projectId,
         ...(filters.status && { status: filters.status }),
         ...(filters.priority && { priority: filters.priority }),
-        // BUG-02: should be { assignedTo: filters.assignedTo }
-        // but instead we do a contains check that also matches null rows
+        // BUG-02 (corregido): match exacto por responsable (no matchea filas null).
         ...(filters.assignedTo && {
-          assignedTo: { equals: filters.assignedTo },
+          assignedTo: filters.assignedTo,
         }),
         ...(filters.search && {
           OR: [
