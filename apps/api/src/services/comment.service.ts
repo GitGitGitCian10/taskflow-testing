@@ -41,7 +41,7 @@ export class CommentService {
     return this.db.comment.findMany({
       where: { taskId },
       include: { author: { select: { id: true, email: true, name: true } } },
-      orderBy: { createdAt: 'desc' }, // BUG: descending instead of ascending
+      orderBy: { createdAt: 'asc' }, // BUG: descending instead of ascending
     })
   }
 

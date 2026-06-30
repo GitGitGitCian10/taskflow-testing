@@ -18,7 +18,7 @@
     "lint": "eslint apps/api/src apps/api/tests && npm run lint --workspaces --if-present",
     "typecheck": "tsc --noEmit --project apps/api/tsconfig.json && npm run typecheck --workspaces --if-present",
     "test:unit": "vitest run --root apps/api tests/unit --coverage",
-    "test:integration": "dotenv -e apps/api/.env.test -- vitest run --root apps/api tests/projects.integration.test.ts tests/tasks.integration.test.ts --no-file-parallelism",
+    "test:integration": "dotenv -e apps/api/.env.test -- vitest run --root apps/api tests/projects.integration.test.ts tests/tasks.integration.test.ts tests/comments.integration.test.ts --no-file-parallelism",
     "test:integration:mocked": "vitest run --root apps/api tests/integration",
     "test:pact": "dotenv -e apps/api/.env.test -- vitest run --root apps/api tests/pact",
     "test:bdd": "npm test --prefix taskflow-bdd",
